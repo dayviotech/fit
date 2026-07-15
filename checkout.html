@@ -54,13 +54,11 @@
     background:var(--charcoal);border:1px solid var(--graphite);border-radius:18px;padding:32px;
     position:sticky;top:94px;
   }
-  .plan-toggle{display:flex;gap:8px;background:var(--obsidian);border:1px solid var(--graphite);border-radius:12px;padding:4px;margin-bottom:24px;}
-  .plan-toggle button{
-    flex:1;padding:10px 12px;border:none;background:transparent;color:var(--steel);
-    font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:13.5px;border-radius:9px;cursor:pointer;
-    transition:background .2s ease,color .2s ease;
+  .plan-badge{
+    display:inline-block;background:rgba(242,183,5,0.12);color:var(--gold);
+    padding:6px 14px;border-radius:999px;margin-bottom:18px;
   }
-  .plan-toggle button.active{background:var(--gold);color:var(--obsidian);}
+  .change-plan-link{color:var(--gold);text-decoration:underline;}
   .summary-price{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
   .summary-price .num{font-family:'Chakra Petch',sans-serif;font-size:34px;font-weight:700;color:var(--gold);}
   .summary-price .period{color:var(--steel);font-size:13px;}
@@ -155,11 +153,7 @@
   .modal-body strong{color:var(--bone);}
 
   /* success state */
-  .success-card{display:none;text-align:center;padding:64px 32px;}
-  .success-card.show{display:block;}
-  .success-icon{width:56px;height:56px;margin:0 auto 20px;}
-  .success-card h2{font-size:1.6rem;margin-bottom:10px;}
-  .success-card p{color:var(--steel);max-width:420px;margin:0 auto;font-size:14.5px;}
+  /* success-card removida: fluxo agora redireciona direto pro Asaas */
 
   @media (max-width:820px){
     .layout{grid-template-columns:1fr;}
@@ -189,15 +183,12 @@
 
   <div class="layout" id="checkout-layout">
     <div class="summary">
-      <div class="plan-toggle">
-        <button type="button" id="btn-essencial" onclick="selectPlan('essencial')">Essencial</button>
-        <button type="button" id="btn-pro" onclick="selectPlan('pro')">Pro</button>
-      </div>
+      <div class="plan-badge mono" id="plan-badge">Plano Essencial</div>
       <div class="summary-price">
         <span class="num" id="plan-price">R$ 59,90</span>
         <span class="period">/mês</span>
       </div>
-      <p class="summary-note">Cobrança recorrente via Pix. Cancele quando quiser.</p>
+      <p class="summary-note">Cobrança recorrente via Pix. Cancele quando quiser. <a href="index.html#planos" class="change-plan-link">Trocar plano</a></p>
       <ul id="plan-features">
         <li><span class="mark"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 13L9.5 18L20 6" stroke="#F2B705" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Alunos ilimitados, sem degrau por quantidade</li>
         <li><span class="mark"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 13L9.5 18L20 6" stroke="#F2B705" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Monte o treino direto no app, com vídeo</li>
@@ -298,12 +289,6 @@
       <button class="submit-btn" id="submit-btn" disabled onclick="submitForm()">Continuar para pagamento</button>
       <p class="submit-hint">Você será direcionado pra um checkout seguro pra finalizar o pagamento via Pix.</p>
     </div>
-
-    <div class="form-card success-card" id="success-card" style="grid-column:1/-1;">
-      <svg class="success-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="11" stroke="#F2B705" stroke-width="1.5"/><path d="M7 12.5L10.5 16L17 8.5" stroke="#F2B705" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <h2>Quase lá!</h2>
-      <p>Recebemos seus dados. Em instantes você será direcionado pro pagamento da assinatura — assim que confirmado, o acesso ao app chega no seu e-mail.</p>
-    </div>
   </div>
 </div>
 
@@ -331,23 +316,33 @@
 <script>
   const plans = {
     essencial: {
+      label: 'Plano Essencial',
       price: 'R$ 59,90',
       features: [
         'Alunos ilimitados, sem degrau por quantidade',
         'Monte o treino direto no app, com vídeo',
         'Cobrança automática via Pix',
         'Wearables (Apple Health / Google Fit)',
-        'Gamificação e alerta de inatividade',
-        'Desafios entre alunos'
+        'Alerta de inatividade'
+      ]
+    },
+    plus: {
+      label: 'Plano Plus',
+      price: 'R$ 89,90',
+      features: [
+        'Tudo do Essencial',
+        'Gamificação e ranking',
+        'Desafios entre alunos',
+        'Gestão de agenda pro atendimento presencial'
       ]
     },
     pro: {
+      label: 'Plano Pro',
       price: 'R$ 119,90',
       features: [
-        'Tudo do Essencial',
+        'Tudo do Plus',
         'Avaliação física por foto, com apoio de IA',
-        'Anamnese assistida diária',
-        'Agenda inteligente pra atendimento presencial'
+        'Anamnese assistida diária'
       ]
     }
   };
@@ -357,15 +352,11 @@
   }
 
   function selectPlan(plan){
-    document.getElementById('btn-essencial').classList.toggle('active', plan === 'essencial');
-    document.getElementById('btn-pro').classList.toggle('active', plan === 'pro');
+    document.getElementById('plan-badge').textContent = plans[plan].label;
     document.getElementById('plan-price').textContent = plans[plan].price;
     const list = document.getElementById('plan-features');
     list.innerHTML = plans[plan].features.map(f => `<li><span class="mark">${markSvg()}</span> ${f}</li>`).join('');
     window.__selectedPlan = plan;
-    const url = new URL(window.location);
-    url.searchParams.set('plano', plan);
-    window.history.replaceState({}, '', url);
   }
 
   function openModal(){ document.getElementById('terms-modal').classList.add('open'); }
@@ -455,22 +446,72 @@
     return ok;
   }
 
-  function submitForm(){
+  // 🔧 Cole aqui a URL do seu webhook do n8n depois de ativar o workflow (Fluxo A)
+  const N8N_WEBHOOK_URL = 'COLE_AQUI_A_URL_DO_WEBHOOK_N8N';
+
+  function fileToBase64(file){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function submitForm(){
     if (!validate()) return;
-    // TODO (backend/Claude Code): substituir este bloco pela chamada real:
-    // 1. Upload dos arquivos (logo, foto de perfil) pro storage (ex: Supabase Storage)
-    // 2. POST pro backend com os dados do formulário + plano selecionado + cor da marca + URLs dos arquivos
-    // 3. Backend cria a ASSINATURA no Asaas (conta raiz Dayvio, cobrando este personal)
-    // 4. Backend retorna a invoiceUrl/QR Code Pix da cobrança gerada
-    // 5. Redirecionar o personal pra essa invoiceUrl para pagamento
-    // 6. Backend só cria a subconta BaaS após webhook PAYMENT_RECEIVED confirmar o pagamento
-    document.getElementById('checkout-layout').style.display = 'none';
-    document.getElementById('success-card').classList.add('show');
+
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processando...';
+
+    try {
+      const logoFile = document.getElementById('logo-input').files[0];
+      const perfilFile = document.getElementById('perfil-input').files[0];
+      const [logoBase64, perfilBase64] = await Promise.all([
+        fileToBase64(logoFile),
+        fileToBase64(perfilFile)
+      ]);
+
+      const payload = {
+        nome: document.getElementById('nome').value,
+        documento: document.getElementById('documento').value,
+        email: document.getElementById('email').value,
+        telefone: document.getElementById('telefone').value,
+        marca: document.getElementById('marca').value,
+        instagram: document.getElementById('instagram').value,
+        corMarca: document.getElementById('cor-marca').value,
+        logoBase64,
+        perfilBase64,
+        plano: window.__selectedPlan || 'essencial'
+      };
+
+      const res = await fetch(N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error('Falha na resposta do servidor');
+      const data = await res.json();
+
+      if (!data.invoiceUrl) throw new Error('invoiceUrl não veio na resposta');
+
+      // Redireciona o navegador pra página de pagamento real, hospedada pelo Asaas
+      window.location.href = data.invoiceUrl;
+
+    } catch (err) {
+      console.error(err);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Continuar para pagamento';
+      alert('Não conseguimos gerar seu pagamento agora. Tenta de novo em instantes ou chama a gente no WhatsApp.');
+    }
   }
 
   // inicializa plano com base na query string (?plano=essencial ou ?plano=pro)
   const params = new URLSearchParams(window.location.search);
-  selectPlan(params.get('plano') === 'pro' ? 'pro' : 'essencial');
+  const planoInicial = plans[params.get('plano')] ? params.get('plano') : 'essencial';
+  selectPlan(planoInicial);
 </script>
 
 </body>
