@@ -72,6 +72,16 @@
   .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
   .submit-hint{text-align:center;color:var(--steel);font-size:12px;margin-top:12px;}
 
+  .transp-card{display:none;}
+  .transp-card.show{display:block;}
+  .transp-card .selo{height:22px;width:auto;filter:brightness(0) invert(1);opacity:.9;margin-bottom:18px;}
+  .transp-card h2{font-size:1.25rem;margin-bottom:14px;}
+  .transp-card p{font-size:13.5px;color:var(--steel);margin-bottom:12px;}
+  .transp-card p strong{color:var(--bone);}
+  .consent-row{display:flex;gap:10px;align-items:flex-start;margin:20px 0 4px;padding:14px 16px;background:var(--obsidian);border:1px solid var(--graphite-2);border-radius:10px;}
+  .consent-row input{margin-top:3px;accent-color:var(--gold);width:16px;height:16px;flex:none;cursor:pointer;}
+  .consent-row label{font-size:13px;color:var(--bone);cursor:pointer;}
+  .back-link{display:block;text-align:center;margin-top:14px;font-size:12.5px;color:var(--steel);background:none;border:none;cursor:pointer;text-decoration:underline;width:100%;}
   .success-card{display:none;text-align:center;padding:56px 32px;}
   .success-card.show{display:block;}
   .success-card h2{font-size:1.5rem;margin-bottom:10px;}
@@ -183,6 +193,20 @@
     <p class="submit-hint">Isso libera a criação da conta onde a mensalidade dos seus alunos vai cair.</p>
   </div>
 
+  <div class="form-card transp-card" id="transp-card">
+    <img class="selo" src="asaas-logo.png" alt="Asaas">
+    <h2>Quem cuida do seu dinheiro</h2>
+    <p>Os serviços financeiros e de pagamentos, incluindo a abertura e manutenção da sua conta de recebimento, o processamento de transações, transferências e demais movimentações de valores, são prestados pela <strong>Asaas Gestão Financeira Instituição de Pagamento S.A.</strong>, instituição de pagamento autorizada a funcionar pelo Banco Central do Brasil.</p>
+    <p><strong>A conta de recebimento que vamos criar agora pertence a você</strong>, não ao Dayvio. O Dayvio Fit atua exclusivamente como integradora tecnológica — não é instituição financeira ou de pagamento, e não guarda nem movimenta o dinheiro dos seus alunos.</p>
+    <p>No próximo passo, você será direcionado pro ambiente seguro da Asaas pra enviar um documento com foto (RG ou CNH) e uma selfie — é uma exigência do Banco Central pra abertura de qualquer conta de pagamento.</p>
+    <div class="consent-row">
+      <input type="checkbox" id="ciencia-check" onchange="document.getElementById('transp-btn').disabled = !this.checked;">
+      <label for="ciencia-check">Estou ciente de que minha conta de recebimento é fornecida pela Asaas, instituição de pagamento autorizada pelo Banco Central, e que ela pertence a mim.</label>
+    </div>
+    <button class="submit-btn" id="transp-btn" disabled onclick="confirmarTransparencia()">Concordar e ir pra verificação</button>
+    <button class="back-link" onclick="voltarFormulario()">Voltar e revisar meus dados</button>
+  </div>
+
   <div class="form-card success-card" id="success-card">
     <h2>Conta em ativação!</h2>
     <p>Recebemos seus dados. Assim que a conta de recebimento for criada, você recebe um e-mail com o acesso ao app.</p>
@@ -231,15 +255,65 @@
     return ok;
   }
 
+  const N8N_ONBOARDING_URL = 'https://n8n-eogk.srv1598428.hstgr.cloud/webhook/dayvio-onboarding-subconta';
+
   function submitForm(){
     if (!validate()) return;
-    // TODO (backend/Claude Code): substituir por chamada real:
-    // 1. Pegar o identificador do personal via query string (?id=... enviado no link do e-mail)
-    // 2. POST desses dados (nascimento, tipoEmpresa se CNPJ, endereço + faturamento) pro webhook do n8n (Fluxo C)
-    // 3. n8n cria a subconta BaaS no Asaas com esses dados + os dados já salvos no Supabase
-    // 4. n8n atualiza status pra 'ativo' e manda e-mail de acesso ao app
+    if (!window.__personalId){
+      alert('Esse link não é válido. Abre de novo o e-mail que a gente te mandou e clica no botão de lá — ou chama a gente no WhatsApp.');
+      return;
+    }
     document.getElementById('form-area').style.display = 'none';
-    document.getElementById('success-card').classList.add('show');
+    document.getElementById('transp-card').classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function voltarFormulario(){
+    document.getElementById('transp-card').classList.remove('show');
+    document.getElementById('form-area').style.display = 'block';
+  }
+
+  async function confirmarTransparencia(){
+    const btn = document.getElementById('transp-btn');
+    btn.disabled = true;
+    btn.textContent = 'Criando sua conta...';
+    try {
+      const res = await fetch(N8N_ONBOARDING_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          personalId: window.__personalId,
+          tipo: window.__tipoDocumento,
+          nascimento: document.getElementById('nascimento').value,
+          tipoEmpresa: document.getElementById('tipoEmpresa').value,
+          cep: document.getElementById('cep').value,
+          endereco: document.getElementById('endereco').value,
+          numero: document.getElementById('numero').value,
+          complemento: document.getElementById('complemento').value,
+          bairro: document.getElementById('bairro').value,
+          cidade: document.getElementById('cidade').value,
+          estado: document.getElementById('estado').value,
+          faturamento: document.getElementById('faturamento').value,
+        }),
+      });
+      let data = null;
+      try { data = await res.json(); } catch(e) { /* resposta vazia = erro no fluxo */ }
+      if (!res.ok || !data){
+        throw new Error('sem resposta');
+      }
+      if (data.onboardingUrl){
+        // Redireciona pro ambiente da Asaas (upload de documento + selfie)
+        window.location.href = data.onboardingUrl;
+        return;
+      }
+      // Conta criada mas sem URL de verificação: mostra confirmação e resolve por e-mail
+      document.getElementById('transp-card').classList.remove('show');
+      document.getElementById('success-card').classList.add('show');
+    } catch(e){
+      btn.disabled = false;
+      btn.textContent = 'Concordar e ir pra verificação';
+      alert('Não conseguimos criar sua conta de recebimento agora. Tenta de novo em instantes ou chama a gente no WhatsApp.');
+    }
   }
 
   // pega o identificador do personal e o tipo de documento vindos do link do e-mail
