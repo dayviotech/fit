@@ -72,16 +72,6 @@
   .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
   .submit-hint{text-align:center;color:var(--steel);font-size:12px;margin-top:12px;}
 
-  .transp-card{display:none;}
-  .transp-card.show{display:block;}
-  .transp-card .selo{height:40px;width:auto;margin-bottom:18px;display:block;}
-  .transp-card h2{font-size:1.25rem;margin-bottom:14px;}
-  .transp-card p{font-size:13.5px;color:var(--steel);margin-bottom:12px;}
-  .transp-card p strong{color:var(--bone);}
-  .consent-row{display:flex;gap:10px;align-items:flex-start;margin:20px 0 4px;padding:14px 16px;background:var(--obsidian);border:1px solid var(--graphite-2);border-radius:10px;}
-  .consent-row input{margin-top:3px;accent-color:var(--gold);width:16px;height:16px;flex:none;cursor:pointer;}
-  .consent-row label{font-size:13px;color:var(--bone);cursor:pointer;}
-  .back-link{display:block;text-align:center;margin-top:14px;font-size:12.5px;color:var(--steel);background:none;border:none;cursor:pointer;text-decoration:underline;width:100%;}
   .success-card{display:none;text-align:center;padding:56px 32px;}
   .success-card.show{display:block;}
   .success-card h2{font-size:1.5rem;margin-bottom:10px;}
@@ -114,8 +104,8 @@
   </div>
 
   <div class="asaas-card">
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L4 6v6c0 5 3.4 8.8 8 10 4.6-1.2 8-5 8-10V6l-8-4z" stroke="#F2B705" stroke-width="1.5"/></svg>
-    <p><strong>Essa conta de recebimento é criada pela Asaas</strong>, instituição de pagamento autorizada pelo Banco Central, parceira do Dayvio Fit. O Dayvio não guarda nem processa o dinheiro dos seus alunos — quem faz isso é a Asaas, com a conta que estamos criando agora com os dados abaixo.</p>
+    <img src="https://baas.asaas.com/selos/Servicos_financeiros_Asaas-Reduzida-Negativo-Branco.svg?id=8027a394-0b29-4eb9-a3d1-27c072175662" alt="Serviços financeiros Asaas" style="width:120px;height:auto;flex:none;margin-top:2px;">
+    <p><strong>A Asaas Gestão Financeira Instituição de Pagamento S.A. é a instituição responsável pelos serviços financeiros desta operação.</strong> A conta de recebimento criada a partir dos dados abaixo pertencerá legalmente a você — o Dayvio Fit não guarda nem processa o dinheiro dos seus alunos, apenas conecta você à Asaas. Antes de prosseguir, você vai revisar esses termos em detalhe na próxima etapa.</p>
   </div>
 
   <div class="form-card" id="form-area">
@@ -189,22 +179,33 @@
       <div class="field-error" id="err-faturamento">Preenche um valor estimado.</div>
     </div>
 
-    <button class="submit-btn" id="submit-btn" onclick="submitForm()">Ativar minha conta de recebimento</button>
+    <button class="submit-btn" id="continue-btn" onclick="goToConfirmStep()">Continuar</button>
     <p class="submit-hint">Isso libera a criação da conta onde a mensalidade dos seus alunos vai cair.</p>
   </div>
 
-  <div class="form-card transp-card" id="transp-card">
-    <a href="https://asaas.com" target="_blank" rel="noopener"><img class="selo" src="https://baas.asaas.com/selos/Servicos_financeiros_Asaas-Reduzida-Negativo-Branco.svg?id=8027a394-0b29-4eb9-a3d1-27c072175662" alt="Serviços financeiros fornecidos pela Asaas"></a>
-    <h2>Quem cuida do seu dinheiro</h2>
-    <p>Os serviços financeiros e de pagamentos, incluindo a abertura e manutenção da sua conta de recebimento, o processamento de transações, transferências e demais movimentações de valores, são prestados pela <strong>Asaas Gestão Financeira Instituição de Pagamento S.A.</strong>, instituição de pagamento autorizada a funcionar pelo Banco Central do Brasil.</p>
-    <p><strong>A conta de recebimento que vamos criar agora pertence a você</strong>, não ao Dayvio. O Dayvio Fit atua exclusivamente como integradora tecnológica — não é instituição financeira ou de pagamento, e não guarda nem movimenta o dinheiro dos seus alunos.</p>
-    <p>No próximo passo, você será direcionado pro ambiente seguro da Asaas pra enviar um documento com foto (RG ou CNH) e uma selfie — é uma exigência do Banco Central pra abertura de qualquer conta de pagamento.</p>
-    <div class="consent-row">
-      <input type="checkbox" id="ciencia-check" onchange="document.getElementById('transp-btn').disabled = !this.checked;">
-      <label for="ciencia-check">Estou ciente de que minha conta de recebimento é fornecida pela Asaas, instituição de pagamento autorizada pelo Banco Central, e que ela pertence a mim.</label>
+  <div class="form-card" id="confirm-area" style="display:none;">
+    <div class="form-section-title">Sobre a sua conta de recebimento</div>
+    <div class="asaas-card" style="margin-top:0;">
+      <img src="https://baas.asaas.com/selos/Servicos_financeiros_Asaas-Reduzida-Negativo-Branco.svg?id=8027a394-0b29-4eb9-a3d1-27c072175662" alt="Serviços financeiros Asaas" style="width:140px;height:auto;flex:none;margin-top:2px;">
+      <p>
+        A <strong>Asaas Gestão Financeira Instituição de Pagamento S.A.</strong>, instituição autorizada pelo Banco Central,
+        é quem presta os serviços financeiros desta operação. A conta de recebimento (subconta) criada com os seus dados
+        <strong>pertence legalmente a você</strong>, não ao Dayvio Fit. O Dayvio conecta você à Asaas, mas não guarda,
+        processa ou tem acesso ao dinheiro que seus alunos pagam — esse fluxo é 100% administrado pela Asaas.
+      </p>
     </div>
-    <button class="submit-btn" id="transp-btn" disabled onclick="confirmarTransparencia()">Concordar e ir pra verificação</button>
-    <button class="back-link" onclick="voltarFormulario()">Voltar e revisar meus dados</button>
+    <p class="field-hint" style="margin:16px 0;">
+      Na próxima tela, hospedada pela própria Asaas, você vai enviar um documento de identificação (RG ou CNH) e uma selfie
+      pra concluir a abertura da conta. É uma etapa de segurança exigida pela regulamentação do Banco Central.
+    </p>
+    <div class="field" style="display:flex;align-items:flex-start;gap:10px;margin-top:20px;">
+      <input type="checkbox" id="confirm-asaas" onchange="toggleConfirmSubmit()" style="margin-top:3px;width:16px;height:16px;flex:none;">
+      <label for="confirm-asaas" style="font-size:13.5px;color:var(--bone);margin:0;">
+        Estou ciente de que a Asaas é a instituição financeira responsável por esta conta e que ela pertence a mim.
+      </label>
+    </div>
+    <button class="submit-btn" id="submit-btn" onclick="submitForm()" disabled style="margin-top:20px;">Ir para a Asaas e concluir</button>
+    <p class="submit-hint">Você vai ser redirecionado pra uma página da Asaas pra enviar seus documentos.</p>
   </div>
 
   <div class="form-card success-card" id="success-card">
@@ -255,64 +256,60 @@
     return ok;
   }
 
-  const N8N_ONBOARDING_URL = 'https://n8n-eogk.srv1598428.hstgr.cloud/webhook/dayvio-onboarding-subconta';
+  // URL do webhook do Fluxo C no n8n (Dayvio - Onboarding Subconta)
+  const N8N_ONBOARDING_WEBHOOK_URL = 'https://n8n-eogk.srv1598428.hstgr.cloud/webhook/dayvio-onboarding-subconta';
 
-  function submitForm(){
+  function goToConfirmStep(){
     if (!validate()) return;
-    if (!window.__personalId){
-      alert('Esse link não é válido. Abre de novo o e-mail que a gente te mandou e clica no botão de lá — ou chama a gente no WhatsApp.');
-      return;
-    }
     document.getElementById('form-area').style.display = 'none';
-    document.getElementById('transp-card').classList.add('show');
+    document.getElementById('confirm-area').style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function voltarFormulario(){
-    document.getElementById('transp-card').classList.remove('show');
-    document.getElementById('form-area').style.display = 'block';
+  function toggleConfirmSubmit(){
+    document.getElementById('submit-btn').disabled = !document.getElementById('confirm-asaas').checked;
   }
 
-  async function confirmarTransparencia(){
-    const btn = document.getElementById('transp-btn');
-    btn.disabled = true;
-    btn.textContent = 'Criando sua conta...';
+  async function submitForm(){
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processando...';
+
     try {
-      const res = await fetch(N8N_ONBOARDING_URL, {
+      const payload = {
+        id: window.__personalId,
+        tipo: window.__tipoDocumento,
+        nascimento: document.getElementById('nascimento').value,
+        tipoEmpresa: window.__tipoDocumento === 'CNPJ' ? document.getElementById('tipoEmpresa').value : undefined,
+        cep: document.getElementById('cep').value,
+        endereco: document.getElementById('endereco').value,
+        numero: document.getElementById('numero').value,
+        complemento: document.getElementById('complemento').value,
+        bairro: document.getElementById('bairro').value,
+        cidade: document.getElementById('cidade').value,
+        estado: document.getElementById('estado').value,
+        faturamento: document.getElementById('faturamento').value,
+      };
+
+      const res = await fetch(N8N_ONBOARDING_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          personalId: window.__personalId,
-          tipo: window.__tipoDocumento,
-          nascimento: document.getElementById('nascimento').value,
-          tipoEmpresa: document.getElementById('tipoEmpresa').value,
-          cep: document.getElementById('cep').value,
-          endereco: document.getElementById('endereco').value,
-          numero: document.getElementById('numero').value,
-          complemento: document.getElementById('complemento').value,
-          bairro: document.getElementById('bairro').value,
-          cidade: document.getElementById('cidade').value,
-          estado: document.getElementById('estado').value,
-          faturamento: document.getElementById('faturamento').value,
-        }),
+        body: JSON.stringify(payload)
       });
-      let data = null;
-      try { data = await res.json(); } catch(e) { /* resposta vazia = erro no fluxo */ }
-      if (!res.ok || !data){
-        throw new Error('sem resposta');
-      }
-      if (data.onboardingUrl){
-        // Redireciona pro ambiente da Asaas (upload de documento + selfie)
-        window.location.href = data.onboardingUrl;
-        return;
-      }
-      // Conta criada mas sem URL de verificação: mostra confirmação e resolve por e-mail
-      document.getElementById('transp-card').classList.remove('show');
-      document.getElementById('success-card').classList.add('show');
-    } catch(e){
-      btn.disabled = false;
-      btn.textContent = 'Concordar e ir pra verificação';
-      alert('Não conseguimos criar sua conta de recebimento agora. Tenta de novo em instantes ou chama a gente no WhatsApp.');
+
+      if (!res.ok) throw new Error('Falha na resposta do servidor');
+      const data = await res.json();
+
+      if (!data.onboardingUrl) throw new Error('onboardingUrl não veio na resposta');
+
+      // Redireciona pra tela hospedada pela Asaas (envio de documento + selfie)
+      window.location.href = data.onboardingUrl;
+
+    } catch (err) {
+      console.error(err);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Ir para a Asaas e concluir';
+      alert('Não conseguimos concluir a abertura da conta agora. Tenta de novo em instantes ou chama a gente no WhatsApp.');
     }
   }
 
